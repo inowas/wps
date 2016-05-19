@@ -9,6 +9,7 @@ from pywps.Process import WPSProcess
 from pyKriging.krige import kriging 
 import numpy as np
 import demjson
+import tempfile
 
 class InterpolationProcess(WPSProcess):
     """
@@ -26,7 +27,6 @@ class InterpolationProcess(WPSProcess):
         with open(str(self.json_string_in.getValue()), 'r') as files:
             string = files.read()
 
-        print string
         json_dict = demjson.decode(string)
         method = json_dict['type']
         xmin, xmax, ymin, ymax = float(json_dict['bounding_box']['x_min']), float(json_dict['bounding_box']['x_max']), float(json_dict['bounding_box']['y_min']), float(json_dict['bounding_box']['y_max'])
@@ -54,7 +54,12 @@ class InterpolationProcess(WPSProcess):
             print 'method is not supported'
         
         output = demjson.encode({"raster":self.grid})
-        self.array_string_out.setValue(output)
+        print str(output)
+        tmpFile=tempfile.NamedTemporaryFile(suffix='.json',prefix='tmp', delete=False)
+        tmpFile.write(str(output))
+        
+        
+        self.array_string_out.setValue(tmpFile.name)
 
         
         
